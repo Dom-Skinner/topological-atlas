@@ -1,4 +1,4 @@
-baseURL = 'https://dom-skinner.github.io/topological-atlas/'
+baseURL = 'https://www.topologicalatlas.org/'
 languageCode = 'en-us'
 title = 'Universal Topological Atlas'
 theme = 'ananke'
