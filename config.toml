@@ -1,0 +1,9 @@
+baseURL = 'http://topologicalatlas.org/'
+languageCode = 'en-us'
+title = 'Universal Topological Atlas'
+theme = 'ananke'
+
+[params]
+  custom_css = ["custom.css"]
+
+

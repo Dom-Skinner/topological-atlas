@@ -1,0 +1,118 @@
+body {
+    background-color: white !important;
+  }
+
+pre {
+    display: block;
+    width: auto;
+    max-height: 600px;
+    overflow: auto;
+    background-color: #eee;
+    border-radius: 10px;
+    border: 1px solid;
+    border-color: var(--cassiopeia-color-primary, #111 );
+    scrollbar-color: #ccc transparent;
+    margin: 5px 10px;
+    padding: 20px;
+    word-wrap: normal;
+}
+
+pre > code {
+    display: block;
+    font-size: 1.0rem;
+    text-indent: 0;
+    color: #111;
+    white-space: inherit;
+}
+
+#tableContainer {
+    max-height: 600px; /* Adjust this value as needed */
+    overflow-y: auto;
+    border: 1px solid #ddd; /* Optional: adds a border around the scrollable area */
+}
+  
+ #systemTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+
+}
+  
+#systemTable th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f8f8; /* Light grey background for header */
+    z-index: 1;
+  }
+
+  
+#systemTable th, #systemTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+  
+#systemTable tr.selected {
+    background-color: #1177d7;
+    font-weight: bold;
+}
+  
+#systemTable tbody tr:hover {
+    cursor: pointer;
+}
+
+#tableContainer::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  #tableContainer::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  #tableContainer::-webkit-scrollbar-thumb {
+    background: #888;
+  }
+  
+  #tableContainer::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+#selectionCounter, #clearSelection {
+margin-top: 10px;
+}
+  
+.main-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* This creates two equal-width columns */
+    gap: 20px; /* This adds space between the columns */
+    max-width: 1600px; /* Adjust as needed */
+    margin: 0 auto; /* This centers the container */
+    padding: 20px;
+}
+  
+.left-column {
+    /* Styles for the left column */
+}
+  
+.right-column {
+    /* Styles for the right column */
+}
+  
+  /* Make it responsive */
+@media (max-width: 768px) {
+    .main-container {
+      grid-template-columns: 1fr; /* Stack columns on smaller screens */
+    }
+}
+
+#selectionCounter {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+#clearSelection {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+  

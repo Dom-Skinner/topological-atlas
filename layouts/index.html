@@ -1,0 +1,138 @@
+{{ define "main" }}
+
+<div class="main-container">
+    <div class="left-column">
+        <p>This interactive topological atlas shows a 3D Euclidean embedding of the pairwise topological
+            distance matrix between various biological and physical systems, using multidimensional scaling (MDS).
+            The topological distance computation relies only on local structural information contained in the
+            Delaunay tessellations of 3D point clouds, which can represent particle centroids of a colloidal
+            packing or nuclei position in tissues or cells in bacterial biofilms. Details of the distance definition
+            and algorithms are described in <a href="https://www.science.org/doi/full/10.1126/sciadv.adg1261" class="bold-text">Skinner, Jeckel, Martin, Drescher, and Dunkel Sci. Adv. (2023)</a></p>
+            <p>Select systems from the table below to explore different parts of the atlas.
+                For every new selection the MDS embedding is recalculated. To contribute and help expand the atlas, please see instructions below.</p>
+            <div id="tableContainer">
+                <table id="systemTable">
+                <thead>
+                    <tr>
+                    <th>System name</th>
+                    <th>Number of samples</th>
+                    <th>Number of points per sample (approximate)</th>
+                    <th>Data source</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- This will be populated by JavaScript -->
+                </tbody>
+                </table>
+            </div>
+            <button id="clearSelection">Clear Selection</button>
+      </div>
+    <div class="right-column"> 
+        <p><img src="Legend.png" width="80%" height="auto" alt="Legend of systems" ,class="img-responsive" /></p>            
+    </div>
+    
+  </div>  
+<div class="main-container">
+    <div class="left-column">  
+        <div id="MDS12Plot"></div>
+    </div>
+    <div class="right-column">   
+        <div id="MDS23Plot"></div>
+    </div>
+</div>
+<div class="main-container">
+    <div class="left-column">
+        <q-table :columns=multisystems.columns_multisystems v-model=multisystems selection="multiple" :selected.sync=multisystems_selection :data=multisystems.data_multisystems dense="" row-key=__id :pagination.sync=multisystems_pagination></q-table>
+        <h1 class="st-header__title text-h3">References<br /></h1>
+        <p><a href="https://doi.org/10.7554/eLife.44898" class="bold-text">[1]</a> Ding et al., <i>eLife</i>, <b>8</b>:e44898 (2019)</p>
+        <p><a href="https://doi.org/10.1101/2021.08.06.455416" class="bold-text">[2]</a> Jeckel et al., bioRxiv:2021.08.06.4554</p>
+        <p><a href="https://www.science.org/doi/abs/10.1126/science.1162493" class="bold-text">[3]</a> Keller, Schmidt, Wittbrodt, and Stelzer, <i>Science</i>, <b>322</b>:5904 (2008)</p>
+        <p><a href="https://doi.org/10.1038/nmeth.1476" class="bold-text">[4]</a> Keller et al., <i>Nat. Meth.</i> <b>7</b>:637 (2010)</p>
+        <p><a href="https://doi.org/10.1038/s41467-020-19863-x" class="bold-text">[5]</a> Cao et al., <i>Nat. Commun.</i> <b>11</b>:6254 (2020)</p>
+        <p><a href="https://doi.org/10.1126/science.aar5663" class="bold-text">[6]</a> Guignard et al., <i>Science</i> <b>369</b>:eaar5663 (2020)</p>
+        <p><a href="https://doi.org/10.1038/s41567-019-0680-8" class="bold-text">[7]</a> Han et al., <i>Nat. Phys.</i> <b>16</b>:101 (2020)</p>
+        <p><a href="http://dx.doi.org/10.1016/j.jcp.2004.08.025" class="bold-text">[8]</a> Donev, Torquato, and Stillinger, <i>J. Comput. Phys.</i> (2005)</p>
+        <p><a href="https://doi.org/10.1038/s41567-020-0842-8" class="bold-text">[9]</a> Bapst et al., <i>Nat. Phys.</i>, <b>16</b>:448 (2020)</p>
+        <p><a href="http://www.astronexus.com/hyg" class="bold-text">[10]</a> The HYG Database</p>
+        <p><a href="http://doi.org/10.1073/pnas.1616768113" class="bold-text">[11]</a> Willis et al., <i>Proc. Natl. Acad. Sci. USA</i>, <b>113</b>:E8238 (2016)</p>
+        <p><a href="https://doi.org/10.1002/gamm.202200018" class="bold-text">[12]</a> Bogunia, Buchen, and Weinberg, <i>GAMM-Mitteilungen</i>, <b>45</b>:e202200018 (2022)</p>
+        <p><a href="https://doi.org/10.1126/sciadv.abm0590" class="bold-text">[13]</a> Karnakov, Litvinov, and Koumoutsakos, <i>Sci. Advan.</i>, <b>8</b>:eabm0590 (2022)</p>
+        <p><a href="https://doi.org/10.7554/eLife.72707" class="bold-text">[14]</a> Day et al., <i>eLife</i>, <b>11</b>:e72707 (2022)</p>
+        <p>This website was built and is maintained by <a href="https://dom-skinner.github.io/">Dominic J. Skinner</a> </p>
+    </div>
+    <div class="right-column">
+        
+        <h1 class="st-header__title text-h3">Contributing to the atlas<br /></h1>
+        <p>To contribute a system to expand the atlas, you will need to provide the following:</p>
+        <p>1. Files of the format &quot;system_name_exp_1.csv&quot;, &quot;system_name_exp_2.csv&quot;, etc., with the first row as
+            &quot;x, y, z&quot; and subsequent rows containing the x, y, z, values of points in the system.</p>
+        <p>2. If the system is not periodic, provide an appropriate radius for the alpha complex to identify the edge points. The matlab script at the bottom of this page can help identify an appropriate radius.</p>
+        <p>3. (optional) A representative image of the system to add to the legend.</p>
+        <p>4. The way in which you would like to be cited.</p>
+        <p>Send the above information to <a href="mailto:topological.atlas.contribute@gmail.com">topological.atlas.contribute@gmail.com</a></p>
+        
+        <p>Below is an example matlab script that can be run to find an appropriate alpha radius for your system.
+            The radius should be set large enough as to only identify points on the boundary of your system. </p>
+        <pre><code>
+    csv_input_file = &#039;path/to/formatted_file.csv&#039;;
+    vertices = table2array(readtable(csv_input_file)); 
+    simplices = delaunay(vertices);
+    a_vals = alpha_shape3D(simplices,vertices);
+
+    edge_vals = [];
+    alpha_val = 2*median(a_vals); %a good starting point, but adjust as necessary
+    for i = 1:length(a_vals)
+        if a_vals(i) &gt; alpha_val
+            edge_vals = [edge_vals; simplices(i,:)];
+        end
+    end
+    edge_vals = unique(edge_vals);
+
+    scatter3(vertices(:,1),vertices(:,2),vertices(:,3))
+    hold on
+    scatter3(vertices(edge_vals,1),vertices(edge_vals,2),vertices(edge_vals,3))
+    % points identified as boundary points will appear in orange
+
+    % Helper functions below
+    function r = circumradius3D(e1,e2,e3,e4)
+        e_n = [norm(e1)^2 ; norm(e2)^2; norm(e3)^2; norm(e4)^2];
+        e_mat = [e1 1 ;e2 1 ;e3 1 ;e4 1];
+        e_mat = [e_n e_mat];
+        a = det(e_mat(:,2:5) );
+        Dx = det(e_mat(:,[1, 3:5]));
+        Dy = det(e_mat(:,[1:2, 4:5]));
+        Dz = det(e_mat(:,[1:3, 5]));
+        c = det(e_mat(:,1:4));
+        r = Dx^2+Dy^2+Dz^2-4*a*c;
+        if r &gt;= 0 
+            r = sqrt(r)/(2*abs(a));
+        else
+            r = Inf;
+        end
+    end
+
+    function a_val = alpha_shape3D(simplices,p)
+        a_val = zeros(length(simplices(:,1)),1);
+        for s = 1:length(simplices(:,1))
+            e1 = p(simplices(s,1),:);
+            e2 = p(simplices(s,2),:);
+            e3 = p(simplices(s,3),:);
+            e4 = p(simplices(s,4),:);
+            a_val(s) = circumradius3D(e1,e2,e3,e4);
+        end
+    end
+        </code></pre>
+    </div>
+</div>
+
+
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>console.log("Plotly loaded:", !!window.Plotly);</script>
+<script src="https://cdn.jsdelivr.net/npm/numeric@1.2.6/numeric-1.2.6.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+<script src="https://unpkg.com/@saehrimnir/druidjs"></script>
+<script src="/js/topological-atlas.js"></script>
+
+{{ end }}
