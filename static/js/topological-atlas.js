@@ -181,10 +181,10 @@ function replaceNames(textName) {
 async function initData() {
     try {
         console.log("Initializing data...");
-        globalDbMulti = await fetchCSV('/topological-atlas/data/db_multi.csv');
+        globalDbMulti = await fetchCSV('/data/db_multi.csv');
         console.log("db_multi loaded_:", globalDbMulti);
         console.log("Last 3 items of db_multi:", globalDbMulti.slice(-3));
-        const d_mat = await fetchCSV('/topological-atlas/data/total_distance_compute.csv');
+        const d_mat = await fetchCSV('/data/total_distance_compute.csv');
         
         populateTable(globalDbMulti, d_mat);
         initializePlots(globalDbMulti, d_mat);
