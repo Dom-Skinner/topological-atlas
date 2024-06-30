@@ -1,0 +1,138 @@
+// Remove global declarations
+// let db_multi = [];
+// let d_mat = [];
+let color_dict = {};
+let symbol_dict = {};
+
+// Fetch and parse CSV data
+async function fetchCSV(url) {
+    const response = await fetch(url);
+    const text = await response.text();
+    return Papa.parse(text, { header: true }).data;
+}
+
+function MDS(distanceMatrix, dimensions = 3) {
+    const n = distanceMatrix.length;
+    let H = numeric.identity(n);
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            H[i][j] -= 1/n;
+        }
+    }
+    const B = numeric.dot(numeric.dot(H, distanceMatrix), H);
+    const eigendecomposition = numeric.eig(B);
+    const eigenvalues = eigendecomposition.lambda.x;
+    const eigenvectors = eigendecomposition.E.x;
+    
+    const sortedIndices = eigenvalues.map((v, i) => [Math.abs(v), i])
+                                     .sort((a, b) => b[0] - a[0])
+                                     .slice(0, dimensions)
+                                     .map(v => v[1]);
+    
+    const coordinates = [];
+    for (let i = 0; i < n; i++) {
+        coordinates.push(sortedIndices.map(j => eigenvectors[i][j] * Math.sqrt(Math.abs(eigenvalues[j]))));
+    }
+    
+    return coordinates;
+}
+// Initialize data
+async function initData() {
+    try {
+        console.log("Initializing data...");
+        const db_multi = await fetchCSV('/data/db_multi.csv');
+        console.log("db_multi loaded:", db_multi);
+        const d_mat = await fetchCSV('/data/total_distance_compute.csv');
+        console.log("d_mat loaded:", d_mat);
+        console.log("First row of d_mat:", d_mat[0]);
+
+        // Initialize color_dict and symbol_dict here
+        // ...
+
+        initializePlots(db_multi, d_mat);
+    } catch (error) {
+        console.error("Error initializing data:", error);
+    }
+}
+
+
+function generatePlotData(mdsCoord, textNames) {
+    return {
+        x: mdsCoord.map(coord => coord[0]),
+        y: mdsCoord.map(coord => coord[1]),
+        text: textNames.map(replaceNames),
+        mode: 'markers',
+        marker: {
+            color: textNames.map(t => color_dict[t]),
+            symbol: textNames.map(t => symbol_dict[replaceNames(t)])
+        },
+        type: 'scatter'
+    };
+}
+
+function generatePlotLayout(xTitle, yTitle) {
+    return {
+        xaxis: { title: xTitle, range: [-9, 9] },
+        yaxis: { title: yTitle, scaleanchor: "x", scaleratio: 1, range: [-4, 4] }
+    };
+}
+
+// Update other functions to accept db_multi and d_mat as parameters
+function initializePlots(db_multi, d_mat) {
+    console.log("Initializing plots...");
+    const allIndices = Array.from({length: db_multi.length}, (_, i) => i);
+    updatePlots(allIndices, db_multi, d_mat);
+}
+
+function updatePlots(selectedIndices, db_multi, d_mat) {
+    console.log("Updating plots with indices:", selectedIndices);
+    const { distanceMatrix, textNames } = restrictedDistanceMatrix(selectedIndices, db_multi, d_mat);
+    console.log("Distance Matrix:", distanceMatrix);
+    console.log("Text Names:", textNames);
+
+    const mdsCoords = MDS(distanceMatrix);
+    console.log("MDS Coordinates:", mdsCoords);
+
+    const plotData12 = generatePlotData(mdsCoords.map(coord => [coord[0], coord[1]]), textNames);
+    const plotData23 = generatePlotData(mdsCoords.map(coord => [coord[2], coord[1]]), textNames);
+
+    console.log("Plot Data 12:", plotData12);
+    console.log("Plot Data 23:", plotData23);
+
+    try {
+        Plotly.newPlot('MDS12Plot', [plotData12], generatePlotLayout("MDS PC1", "MDS PC2"));
+        console.log("MDS12Plot generated");
+    } catch (error) {
+        console.error("Error generating MDS12Plot:", error);
+    }
+
+    try {
+        Plotly.newPlot('MDS23Plot', [plotData23], generatePlotLayout("MDS PC3", "MDS PC2"));
+        console.log("MDS23Plot generated");
+    } catch (error) {
+        console.error("Error generating MDS23Plot:", error);
+    }
+}
+
+
+
+function replaceNames(textName) {
+    const idx = db_multi.findIndex(row => textName.includes(row["Search word"]));
+    return idx !== -1 ? db_multi[idx]["System name"] : textName;
+}
+
+function restrictedDistanceMatrix(indices, db_multi, d_mat) {
+    const keyWords = indices.map(i => db_multi[i]["Search word"]);
+    const idxKeep = Object.keys(d_mat[0]).filter(col => keyWords.some(word => col.includes(word)));
+    const distanceMatrix = idxKeep.map(row => idxKeep.map(col => parseFloat(d_mat[0][col])));
+    return { distanceMatrix, textNames: idxKeep };
+}
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', initData);
+
+// Handle table selection
+document.getElementById('systemTable').addEventListener('change', function(event) {
+    const selectedIndices = Array.from(event.target.selectedOptions, option => parseInt(option.value));
+    updatePlots(selectedIndices.length > 0 ? selectedIndices : Array.from({length: db_multi.length}, (_, i) => i));
+});
